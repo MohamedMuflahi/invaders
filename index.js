@@ -20,8 +20,7 @@ const config = {
 const game = new Phaser.Game(config)
 let MC;
 let EN;
-const horizontalSpeed = 2;
-const verticalSpeed = 2;
+const planeSpeed = 250;
 const bulletVelocity = 200;
 const plane_width = 63;
 const plane_height = 48;
@@ -58,87 +57,91 @@ function create() {
 
 }
 function update() {
-    const leftButton  = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
-    const rightButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
-    const upButton    = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
-    const downButton  = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
-    const spaceButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    if(this.input.keyboard.checkDown(leftButton, 1)) {
-        MC.x -= horizontalSpeed;
-        MC.rotation = -(3.14/2);
+  let cursor;
+  this.input.on('pointermove', function (pointer) {
+    cursor = pointer;
+    let angle = Phaser.Math.Angle.Between(MC.x, MC.y, cursor.x + this.cameras.main.scrollX, cursor.y + this.cameras.main.scrollY)
+    MC.rotation = (angle + 1.5)
+    // console.log(cursor.y - MC.y)
+    if(Math.abs(cursor.x - MC.x) < 20){
+      return;
     }
-    if(this.input.keyboard.checkDown(rightButton, 1)) {
-        MC.x += horizontalSpeed;
-        MC.rotation = 3.14/2;
+    if(Math.abs(cursor.y - MC.y) < 20){
+      return;
     }
-    if(this.input.keyboard.checkDown(upButton, 1)) {
-        MC.y -= verticalSpeed;
-        MC.rotation = 0;
-    }
-    if(this.input.keyboard.checkDown(downButton, 1)) {
-        MC.y += verticalSpeed;
-        MC.rotation = 3.14;
-    }
-    if(this.input.keyboard.checkDown(spaceButton, 150)) {
-      // spawns bullet on top of MC
-     
+      this.physics.moveTo(MC, cursor.x, cursor.y, planeSpeed)
+}, this);
 
-      // set speed of bullet
-      let bullet;
-      if(MC.rotation == 0){
-        bullet = this.physics.add.image(MC.x+(plane_width/4), MC.y - 5, 'bubble')
-        bullet.setScale(bulletSize)
-        bullet.setRotation(bulletRotation) 
-        bullet.setVelocityY(-bulletVelocity) 
-      }else if(MC.rotation == 3.1400000000000006){
-        bullet = this.physics.add.image(MC.x+(plane_width/4), MC.y + 5, 'bubble')
-        bullet.setScale(bulletSize)
-        bullet.setRotation(-bulletRotation) 
-        bullet.setVelocityY(bulletVelocity) 
-      }else if(MC.rotation == 1.5700000000000003){
-        bullet = this.physics.add.image(MC.x+(plane_width/4), MC.y - 5, 'bubble')
-        bullet.setScale(bulletSize)
-        // bullet.setRotation(bulletRotation) 
-        bullet.setVelocityX(bulletVelocity) 
-      }else if(MC.rotation == -1.5700000000000003){
-        bullet = this.physics.add.image(MC.x+(plane_width/4), MC.y - 5, 'bubble')
-        bullet.setScale(bulletSize)
-        bullet.setRotation(3.14) 
-        bullet.setVelocityX(-bulletVelocity) 
-      }
-      
-      // set bullet to not fall
-      bullet.body.setAllowGravity(false)
-      // set bullet to collide with world bounds 
-      //and delete itself when it does hit the bounds
-      bullet.setCollideWorldBounds(true)
-      bullet.body.onWorldBounds = true;
-      bullet.body.world.on('worldbounds', function(body) {
-        if (body.gameObject === this) {
-          this.destroy();
-        }
-      }, bullet);
-      
-      // let bullet2 = this.physics.add.image(MC.x -(plane_width/4), MC.y - 5, 'bubble')
-      // bullet2.setScale(bulletSize)
-      // bullet2.setRotation(bulletRotation) 
-      // // set speed of bullet2
-      // bullet2.setVelocityY(-bulletVelocity) 
-      // // set bullet2 to not fall
-      // bullet2.body.setAllowGravity(false)
-      // // set bullet2 to collide with world bounds 
-      // //and delete itself when it does hit the bounds
-      // bullet2.setCollideWorldBounds(true)
-      // bullet2.body.onWorldBounds = true;
-      // bullet2.body.world.on('worldbounds', function(body) {
-      //   if (body.gameObject === this) {
-      //     this.destroy();
-      //   }
-      // }, bullet2);
-    }
+    // if(this.input.keyboard.checkDown(spaceButton, 150)) {
+    //   // spawns bullet on top of MC
+    //   // set speed of bullet
+    //   let rightBullet = this.physics.add.image(MC.x+(plane_width/4), MC.y - 5, 'bubble')
+    //   let leftBullet = this.physics.add.image(MC.x-(plane_width/4), MC.y -5, 'bubble')  
+    //   if(MC.rotation == 0){
+    //     let right = new Bullet(-bulletVelocity,10, bulletSize, bulletRotation,rightBullet,true)
+    //     let left = new Bullet(-bulletVelocity,10, bulletSize, bulletRotation,leftBullet,true)
+    //     right.spawnBullet()
+    //     left.spawnBullet()
+    //   }else if(MC.rotation == 3.1400000000000006){
+    //     let right = new Bullet(bulletVelocity,10, bulletSize, -bulletRotation,rightBullet,true)
+    //     let left = new Bullet(bulletVelocity,10, bulletSize, -bulletRotation,leftBullet,true)
+    //     right.spawnBullet()
+    //     left.spawnBullet()
+    //   }else if(MC.rotation == 1.5700000000000003){
+    //     let right = new Bullet(bulletVelocity,10, bulletSize, null,rightBullet, false)
+    //     let left = new Bullet(bulletVelocity,10, bulletSize, null,leftBullet, false)
+    //     right.spawnBullet()
+    //     left.spawnBullet()
+    //   }else if(MC.rotation == -1.5700000000000003){
+    //     let right = new Bullet(-bulletVelocity,10, bulletSize, 3.14,rightBullet, false)
+    //     let left = new Bullet(-bulletVelocity,10, bulletSize, 3.14,leftBullet, false)
+    //     right.spawnBullet()
+    //     left.spawnBullet()
+    //   } 
+    // }
 
     // this.physics.world.on('collide', listener) 
     // gonna use this later for collision detection on enemies
 
 }
 
+class Enemy {
+  constructor(x, y, speed, health, damage) {
+    this.x = x;
+    this.y = y;
+    this.speed = speed;
+    this.health = health;
+    this.damage = damage;
+  }
+}
+
+class Bullet {
+  constructor(speed, damage,size, rotation,bullet,vertical) {
+    this.speed = speed;
+    this.damage = damage;
+    this.size = size;
+    this.rotation = rotation;
+    this.bullet = bullet;
+    this.vertical = vertical;
+  }
+  spawnBullet(){
+    this.bullet.setScale(this.size)
+    if(this.rotation != null){
+      this.bullet.setRotation(this.rotation) 
+    }
+    if(this.vertical == true){
+      this.bullet.setVelocityY(this.speed)
+    }else{
+      this.bullet.setVelocityX(this.speed)
+    }
+    this.bullet.body.setAllowGravity(false)
+    this.bullet.setCollideWorldBounds(true)
+    this.bullet.body.onWorldBounds = true;
+    this.bullet.body.world.on('worldbounds', function(body) {
+      if (body.gameObject === this) {
+        this.destroy();
+        console.log("bullet destroyed")
+      }
+    }, this.bullet);
+  }
+}
