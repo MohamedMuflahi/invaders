@@ -49,8 +49,8 @@ function create() {
     
 
     MC = this.physics.add.image(400, 600-plane_height, 'character')
-    EN = this.physics.add.image(400, 0+plane_height, 'character')
-    EN.body.setAllowGravity(false)
+    // EN = this.physics.add.image(400, 0+plane_height, 'character')
+    // EN.body.setAllowGravity(false)
 
     MC.body.setAllowGravity(false)
     MC.setCollideWorldBounds(true)
@@ -65,24 +65,48 @@ function update() {
     const spaceButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     if(this.input.keyboard.checkDown(leftButton, 1)) {
         MC.x -= horizontalSpeed;
+        MC.rotation = -(3.14/2);
     }
     if(this.input.keyboard.checkDown(rightButton, 1)) {
         MC.x += horizontalSpeed;
+        MC.rotation = 3.14/2;
     }
     if(this.input.keyboard.checkDown(upButton, 1)) {
         MC.y -= verticalSpeed;
+        MC.rotation = 0;
     }
     if(this.input.keyboard.checkDown(downButton, 1)) {
         MC.y += verticalSpeed;
+        MC.rotation = 3.14;
     }
     if(this.input.keyboard.checkDown(spaceButton, 150)) {
       // spawns bullet on top of MC
-      let bullet = this.physics.add.image(MC.x+(plane_width/4), MC.y - 5, 'bubble')
-      bullet.setScale(bulletSize)
-      bullet.setRotation(bulletRotation) 
+     
 
       // set speed of bullet
-      bullet.setVelocityY(-bulletVelocity) 
+      let bullet;
+      if(MC.rotation == 0){
+        bullet = this.physics.add.image(MC.x+(plane_width/4), MC.y - 5, 'bubble')
+        bullet.setScale(bulletSize)
+        bullet.setRotation(bulletRotation) 
+        bullet.setVelocityY(-bulletVelocity) 
+      }else if(MC.rotation == 3.1400000000000006){
+        bullet = this.physics.add.image(MC.x+(plane_width/4), MC.y + 5, 'bubble')
+        bullet.setScale(bulletSize)
+        bullet.setRotation(-bulletRotation) 
+        bullet.setVelocityY(bulletVelocity) 
+      }else if(MC.rotation == 1.5700000000000003){
+        bullet = this.physics.add.image(MC.x+(plane_width/4), MC.y - 5, 'bubble')
+        bullet.setScale(bulletSize)
+        // bullet.setRotation(bulletRotation) 
+        bullet.setVelocityX(bulletVelocity) 
+      }else if(MC.rotation == -1.5700000000000003){
+        bullet = this.physics.add.image(MC.x+(plane_width/4), MC.y - 5, 'bubble')
+        bullet.setScale(bulletSize)
+        bullet.setRotation(3.14) 
+        bullet.setVelocityX(-bulletVelocity) 
+      }
+      
       // set bullet to not fall
       bullet.body.setAllowGravity(false)
       // set bullet to collide with world bounds 
@@ -95,22 +119,22 @@ function update() {
         }
       }, bullet);
       
-      let bullet2 = this.physics.add.image(MC.x -(plane_width/4), MC.y - 5, 'bubble')
-      bullet2.setScale(bulletSize)
-      bullet2.setRotation(bulletRotation) 
-      // set speed of bullet2
-      bullet2.setVelocityY(-bulletVelocity) 
-      // set bullet2 to not fall
-      bullet2.body.setAllowGravity(false)
-      // set bullet2 to collide with world bounds 
-      //and delete itself when it does hit the bounds
-      bullet2.setCollideWorldBounds(true)
-      bullet2.body.onWorldBounds = true;
-      bullet2.body.world.on('worldbounds', function(body) {
-        if (body.gameObject === this) {
-          this.destroy();
-        }
-      }, bullet2);
+      // let bullet2 = this.physics.add.image(MC.x -(plane_width/4), MC.y - 5, 'bubble')
+      // bullet2.setScale(bulletSize)
+      // bullet2.setRotation(bulletRotation) 
+      // // set speed of bullet2
+      // bullet2.setVelocityY(-bulletVelocity) 
+      // // set bullet2 to not fall
+      // bullet2.body.setAllowGravity(false)
+      // // set bullet2 to collide with world bounds 
+      // //and delete itself when it does hit the bounds
+      // bullet2.setCollideWorldBounds(true)
+      // bullet2.body.onWorldBounds = true;
+      // bullet2.body.world.on('worldbounds', function(body) {
+      //   if (body.gameObject === this) {
+      //     this.destroy();
+      //   }
+      // }, bullet2);
     }
 
     // this.physics.world.on('collide', listener) 
