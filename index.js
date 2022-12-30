@@ -19,17 +19,21 @@ const config = {
 
 const game = new Phaser.Game(config)
 let MC;
+let EN;
 const horizontalSpeed = 2;
 const verticalSpeed = 2;
 const bulletVelocity = 200;
 const plane_width = 63;
 const plane_height = 48;
+const waves = 5;
+const bulletSize = 1;
+const bulletRotation = 4.7;
 function preload() {
     this.load.setBaseURL('http://labs.phaser.io')
     this.load.image('sky', 'assets/skies/pixelback1.jpg')
     this.load.image('character', 'assets/sprites/ww2plane.png')
     this.load.image('flame', 'assets/particles/flame1.png')
-    this.load.image('bubble', 'assets/particles/bubble.png')
+    this.load.image('bubble', 'assets/sprites/bullets/bullet5.png')
 }
 
 function create() {
@@ -45,6 +49,9 @@ function create() {
     
 
     MC = this.physics.add.image(400, 600-plane_height, 'character')
+    EN = this.physics.add.image(400, 0+plane_height, 'character')
+    EN.body.setAllowGravity(false)
+
     MC.body.setAllowGravity(false)
     MC.setCollideWorldBounds(true)
     emitter.startFollow(MC)
@@ -68,10 +75,12 @@ function update() {
     if(this.input.keyboard.checkDown(downButton, 1)) {
         MC.y += verticalSpeed;
     }
-    if(this.input.keyboard.checkDown(spaceButton, 100)) {
+    if(this.input.keyboard.checkDown(spaceButton, 150)) {
       // spawns bullet on top of MC
       let bullet = this.physics.add.image(MC.x+(plane_width/4), MC.y - 5, 'bubble')
-      bullet.setScale(0.2)
+      bullet.setScale(bulletSize)
+      bullet.setRotation(bulletRotation) 
+
       // set speed of bullet
       bullet.setVelocityY(-bulletVelocity) 
       // set bullet to not fall
@@ -87,7 +96,8 @@ function update() {
       }, bullet);
       
       let bullet2 = this.physics.add.image(MC.x -(plane_width/4), MC.y - 5, 'bubble')
-      bullet2.setScale(0.2)
+      bullet2.setScale(bulletSize)
+      bullet2.setRotation(bulletRotation) 
       // set speed of bullet2
       bullet2.setVelocityY(-bulletVelocity) 
       // set bullet2 to not fall
@@ -102,6 +112,9 @@ function update() {
         }
       }, bullet2);
     }
+
+    // this.physics.world.on('collide', listener) 
+    // gonna use this later for collision detection on enemies
 
 }
 
