@@ -20,7 +20,7 @@ const config = {
 const game = new Phaser.Game(config)
 let MC;
 let EN;
-const planeSpeed = 250;
+const planeSpeed = 150;
 const bulletVelocity = 200;
 const plane_width = 63;
 const plane_height = 48;
@@ -54,15 +54,19 @@ function create() {
     MC.body.setAllowGravity(false)
     MC.setCollideWorldBounds(true)
     emitter.startFollow(MC)
+    // x,y,speed, damage,size, rotation,bulletSprite
+    
+    console.log(this)
 
 }
 function update() {
+
   let cursor;
+  let angle;
   this.input.on('pointermove', function (pointer) {
     cursor = pointer;
-    let angle = Phaser.Math.Angle.Between(MC.x, MC.y, cursor.x + this.cameras.main.scrollX, cursor.y + this.cameras.main.scrollY)
+    angle = Phaser.Math.Angle.Between(MC.x, MC.y, cursor.x + this.cameras.main.scrollX, cursor.y + this.cameras.main.scrollY)
     MC.rotation = (angle + 1.5)
-    // console.log(cursor.y - MC.y)
     if(Math.abs(cursor.x - MC.x) < 20){
       return;
     }
@@ -70,35 +74,15 @@ function update() {
       return;
     }
       this.physics.moveTo(MC, cursor.x, cursor.y, planeSpeed)
-}, this);
+}, this); 
+  const spaceButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+   if(this.input.keyboard.checkDown(spaceButton, 150)) {
 
-    // if(this.input.keyboard.checkDown(spaceButton, 150)) {
-    //   // spawns bullet on top of MC
-    //   // set speed of bullet
-    //   let rightBullet = this.physics.add.image(MC.x+(plane_width/4), MC.y - 5, 'bubble')
-    //   let leftBullet = this.physics.add.image(MC.x-(plane_width/4), MC.y -5, 'bubble')  
-    //   if(MC.rotation == 0){
-    //     let right = new Bullet(-bulletVelocity,10, bulletSize, bulletRotation,rightBullet,true)
-    //     let left = new Bullet(-bulletVelocity,10, bulletSize, bulletRotation,leftBullet,true)
-    //     right.spawnBullet()
-    //     left.spawnBullet()
-    //   }else if(MC.rotation == 3.1400000000000006){
-    //     let right = new Bullet(bulletVelocity,10, bulletSize, -bulletRotation,rightBullet,true)
-    //     let left = new Bullet(bulletVelocity,10, bulletSize, -bulletRotation,leftBullet,true)
-    //     right.spawnBullet()
-    //     left.spawnBullet()
-    //   }else if(MC.rotation == 1.5700000000000003){
-    //     let right = new Bullet(bulletVelocity,10, bulletSize, null,rightBullet, false)
-    //     let left = new Bullet(bulletVelocity,10, bulletSize, null,leftBullet, false)
-    //     right.spawnBullet()
-    //     left.spawnBullet()
-    //   }else if(MC.rotation == -1.5700000000000003){
-    //     let right = new Bullet(-bulletVelocity,10, bulletSize, 3.14,rightBullet, false)
-    //     let left = new Bullet(-bulletVelocity,10, bulletSize, 3.14,leftBullet, false)
-    //     right.spawnBullet()
-    //     left.spawnBullet()
-    //   } 
-    // }
+     let right = new Bullet(MC.x-(plane_width/4), MC.y - 5, 500,10, bulletSize, MC.rotation -1.5,'bubble')
+     right.spawnBullet()
+     let left = new Bullet(MC.x+(plane_width/4), MC.y - 5, 500,10, bulletSize, MC.rotation -1.5,'bubble')
+     left.spawnBullet()
+   }
 
     // this.physics.world.on('collide', listener) 
     // gonna use this later for collision detection on enemies
@@ -116,32 +100,31 @@ class Enemy {
 }
 
 class Bullet {
-  constructor(speed, damage,size, rotation,bullet,vertical) {
+  constructor(x,y,speed, damage,size, rotation,bulletSprite) {
+    this.x = x;
+    this.y = y;
     this.speed = speed;
     this.damage = damage;
     this.size = size;
     this.rotation = rotation;
-    this.bullet = bullet;
-    this.vertical = vertical;
+    this.bulletSprite = bulletSprite;
+    this.scene = game.scene.scenes[0]
   }
   spawnBullet(){
-    this.bullet.setScale(this.size)
-    if(this.rotation != null){
-      this.bullet.setRotation(this.rotation) 
-    }
-    if(this.vertical == true){
-      this.bullet.setVelocityY(this.speed)
-    }else{
-      this.bullet.setVelocityX(this.speed)
-    }
-    this.bullet.body.setAllowGravity(false)
-    this.bullet.setCollideWorldBounds(true)
-    this.bullet.body.onWorldBounds = true;
-    this.bullet.body.world.on('worldbounds', function(body) {
+    
+    let bullet =  this.scene.physics.add.image(this.x, this.y, this.bulletSprite)
+    let velcoityVector = this.scene.physics.velocityFromRotation(this.rotation, this.speed)
+    bullet.rotation = this.rotation
+    bullet.body.setVelocity(velcoityVector.x, velcoityVector.y)
+    bullet.setScale(this.size)
+    bullet.body.setAllowGravity(false)
+    bullet.setCollideWorldBounds(true)
+    bullet.body.onWorldBounds = true;
+    bullet.body.world.on('worldbounds', function(body) {
       if (body.gameObject === this) {
         this.destroy();
         console.log("bullet destroyed")
       }
-    }, this.bullet);
+    }, bullet);
   }
 }
